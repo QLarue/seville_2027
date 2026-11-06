@@ -31,6 +31,8 @@ h1{font-size:22px;margin:4px 0 2px}
 .set label{flex:1 1 150px;font-size:12px;color:var(--mut);display:flex;flex-direction:column;gap:4px}
 .set input,.set select{font:600 18px system-ui,sans-serif;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);width:100%}
 .hint{font-size:12px;color:var(--mut);margin-top:8px}
+.tin{display:flex;gap:6px}
+.tin input{flex:1;min-width:0}
 .bars{display:flex;align-items:flex-end;gap:4px;height:70px;margin-top:8px}
 .bar{flex:1;background:var(--sv1);opacity:.35;border-radius:4px 4px 0 0;position:relative;min-height:3px}
 .bar.cur{opacity:1}
@@ -92,7 +94,7 @@ td b{font-variant-numeric:tabular-nums}
 </div>
 <div class="panel"><b>Pas de test VMA ?</b>
 <p class="hint" style="margin:4px 0 8px">Estime ta VMA à partir d’une course récente (10 km ou semi).</p>
-<div class="set"><label>Distance<select id="ed"><option value="10">10 km</option><option value="21.0975">Semi-marathon</option></select></label><label>Temps (h:mm:ss ou mm:ss)<input id="et" type="text" inputmode="numeric" placeholder="ex. 36:30"></label></div>
+<div class="set"><label>Distance<select id="ed"><option value="10">10 km</option><option value="21.0975">Semi-marathon</option></select></label><label>Temps de course<span class="tin"><input id="eh" type="number" inputmode="numeric" min="0" max="9" placeholder="h"><input id="em" type="number" inputmode="numeric" min="0" max="59" placeholder="min"><input id="es" type="number" inputmode="numeric" min="0" max="59" placeholder="s"></span></label></div>
 <div class="hint" id="er"></div>
 <div class="btns"><button class="btn" id="eu" style="display:none">Utiliser cette VMA</button></div></div>
 <div class="panel"><b>Allure marathon et % de VMA</b>
@@ -214,10 +216,10 @@ function cl(){document.getElementById("ov").classList.remove("on")}
 function tg(i,k){done[i+k]=!done[i+k];sv("done",done);render();cl()}
 document.getElementById("ov").addEventListener("click",function(e){if(e.target===this)cl()});
 function pt(s){var p=s.trim().split(":").map(Number);if(p.some(isNaN)||p.length<2||p.length>3)return 0;return p.length===3?p[0]*3600+p[1]*60+p[2]:p[0]*60+p[1]}
-function est(){var d=+document.getElementById("ed").value,t=pt(document.getElementById("et").value),r=document.getElementById("er"),b=document.getElementById("eu");if(t<1200){r.textContent="";b.style.display="none";return}var f=d<15?0.91:0.86,v=d/(t/3600),e=Math.round(v/f*10)/10;r.innerHTML="Vitesse moyenne "+fn(v.toFixed(1))+" km/h → VMA estimée ≈ <b>"+fn(e)+" km/h</b> (en supposant environ "+Math.round(f*100)+" % de VMA sur cette distance).";b.style.display="block";b.onclick=function(){vma=e;sv("vma",e);iv.value=e;render()}}
+function est(){var d=+document.getElementById("ed").value,t=(+document.getElementById("eh").value||0)*3600+(+document.getElementById("em").value||0)*60+(+document.getElementById("es").value||0),r=document.getElementById("er"),b=document.getElementById("eu");if(t<1200){r.textContent="";b.style.display="none";return}var f=d<15?0.91:0.86,v=d/(t/3600),e=Math.round(v/f*10)/10;r.innerHTML="Vitesse moyenne "+fn(v.toFixed(1))+" km/h → VMA estimée ≈ <b>"+fn(e)+" km/h</b> (en supposant environ "+Math.round(f*100)+" % de VMA sur cette distance).";b.style.display="block";b.onclick=function(){vma=e;sv("vma",e);iv.value=e;render()}}
 function rb(){var h="";[["Début de prépa",78],["Fin de prépa",84]].forEach(function(x){var a=3600/(vma*x[1]/100);h+='<button class="btn" onclick="setmp('+x[1]+')"><span style="font-weight:400;font-size:12px;display:block;color:var(--mut)">'+x[0]+' · '+x[1]+' %</span>'+mmss(a)+' /km · '+hms(a*42.195)+'</button>'});document.getElementById("mb").innerHTML=h;document.getElementById("mph").textContent+=vma<15?" · VMA < 15 km/h : séance SV2 optionnelle (semaines 1 à 6), séance VMA optionnelle (semaines 7 à 12).":""}
 function setmp(x){mp=x;sv("mp",x);im.value=x;render()}
-document.getElementById("ed").addEventListener("change",est);document.getElementById("et").addEventListener("input",est);
+document.getElementById("ed").addEventListener("change",est);["eh","em","es"].forEach(function(id){document.getElementById(id).addEventListener("input",est)});
 vma=+ld("vma",20)||20;mp=+ld("mp",82)||82;done=ld("done",{})||{};
 var iv=document.getElementById("vma"),im=document.getElementById("mp");
 iv.value=vma;im.value=mp;var c0=cur();ex[c0>=0?c0:0]=true;var th=ld("theme",null);if(th)ap(th);else document.getElementById("tt").textContent=dk()?"☀️":"🌙";
